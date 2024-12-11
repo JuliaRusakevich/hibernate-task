@@ -3,6 +3,7 @@ package ru.clevertec.entity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -26,7 +27,7 @@ o Связи: OneToMany с автомобилями.
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(callSuper = true)
+@ToString
 @Builder
 @Entity
 @Table(schema = "car_showroom", name = "car_showrooms")
@@ -42,7 +43,7 @@ public class CarShowroom {
     @Column(name = "address")
     private String address;
 
-    @OneToMany(mappedBy = "carShowroom", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "carShowroom", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @Builder.Default
     private List<Car> cars = new ArrayList<>();
 }

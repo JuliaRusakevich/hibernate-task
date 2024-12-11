@@ -38,7 +38,7 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(callSuper = true)
+@ToString
 @Builder
 @Entity
 @Table(schema = "car_showroom", name = "clients")
@@ -64,7 +64,7 @@ public class Client {
     @Builder.Default
     private List<Review> reviews = new ArrayList<>();
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "client_cars",
             joinColumns = @JoinColumn(name = "client_uuid"),
             inverseJoinColumns = @JoinColumn(name = "car_uuid"))

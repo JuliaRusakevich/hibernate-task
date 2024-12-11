@@ -1,10 +1,10 @@
-package ru.clevertec.repository.api;
+package ru.clevertec.service.api;
 
 import java.util.List;
 
-public interface ICRUDRepository<I, E> {
 
-    E create(E e);
+public interface BaseService<I, E> {
+    E add(E e);
 
     E update(E e);
 
@@ -14,3 +14,4 @@ public interface ICRUDRepository<I, E> {
 
     List<E> findAll();
 }
+

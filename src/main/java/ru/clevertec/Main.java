@@ -3,15 +3,18 @@ package ru.clevertec;
 import ru.clevertec.entity.Car;
 import ru.clevertec.entity.Client;
 import ru.clevertec.entity.Review;
-import ru.clevertec.repository.impl.ReviewRepository;
-import ru.clevertec.service.impl.CarService;
-import ru.clevertec.service.impl.CarShowroomService;
-import ru.clevertec.service.impl.CategoryService;
-import ru.clevertec.service.impl.ClientService;
-import ru.clevertec.service.impl.ReviewService;
+import ru.clevertec.exception.CustomException;
+import ru.clevertec.repository.api.ClientRepository;
+import ru.clevertec.repository.impl.ClientRepositoryImpl;
+import ru.clevertec.service.impl.CarServiceImpl;
+import ru.clevertec.service.impl.CarShowroomServiceImpl;
+import ru.clevertec.service.impl.CategoryServiceImpl;
+import ru.clevertec.service.impl.ClientServiceImpl;
+import ru.clevertec.service.impl.ReviewServiceImpl;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 
 public class Main {
@@ -19,11 +22,11 @@ public class Main {
 
         //HibernateUtil.dropAllTables();
 
-        CarService carService = CarService.getInstance();
-        CategoryService categoryService = CategoryService.getInstance();
-        CarShowroomService carShowroomService = CarShowroomService.getInstance();
-        ClientService clientService = ClientService.getInstance();
-        ReviewService reviewService = ReviewService.getInstance();
+        CarServiceImpl carService = CarServiceImpl.getInstance();
+        CategoryServiceImpl categoryService = CategoryServiceImpl.getInstance();
+        CarShowroomServiceImpl carShowroomService = CarShowroomServiceImpl.getInstance();
+        ClientServiceImpl clientService = ClientServiceImpl.getInstance();
+        ReviewServiceImpl reviewService = ReviewServiceImpl.getInstance();
 
 
         /**Добавление автомобиля: addCar(Car car)
@@ -85,12 +88,16 @@ public class Main {
          */
 
         /** Добавление отзыва клиента: addReview(Client client, Car car, String text, int rating).
+         try {
          Client client = clientService.findById(UUID.fromString("867b2880-08fa-444b-8f70-a43236d25d1c"));
-         Car car = carService.findById(UUID.fromString("38e07d72-6401-4847-9292-c10c4a0c383d"));
+         Car car = carService.findById(UUID.fromString("0eb60d21-ee27-49a2-8715-d24dc40bfad2"));
          String textReview = "WOW";
          int rating = 5;
          reviewService.addReview(client, car, textReview, rating);
-         */
+         }catch (Exception e){
+         System.out.println(e.getMessage());
+         } */
+
 
         /**Полнотекстовый поиск отзывов: searchReviews(String keyword).
          List<Review> reviews = reviewService.searchReviews("WO");

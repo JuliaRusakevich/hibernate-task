@@ -8,16 +8,17 @@ import org.hibernate.query.criteria.JpaCriteriaQuery;
 import org.hibernate.query.criteria.JpaRoot;
 import ru.clevertec.entity.Car;
 import ru.clevertec.entity.CarShowroom;
-import ru.clevertec.repository.api.ICRUDRepository;
-import ru.clevertec.repository.api.ICarShowroomRepository;
+import ru.clevertec.exception.CustomException;
+import ru.clevertec.repository.api.CrudRepository;
+import ru.clevertec.util.Constant;
 import ru.clevertec.util.HibernateUtil;
 
 import java.util.List;
 import java.util.UUID;
 
-public class CarShowroomRepository implements ICRUDRepository<UUID, CarShowroom>, ICarShowroomRepository {
+public class CarShowroomRepositoryImpl implements CrudRepository<UUID, CarShowroom>, ru.clevertec.repository.api.CarShowroomRepository {
 
-    private static final CarShowroomRepository INSTANCE = new CarShowroomRepository();
+    private static final CarShowroomRepositoryImpl INSTANCE = new CarShowroomRepositoryImpl();
 
     @Override
     public CarShowroom create(CarShowroom showroom) {
@@ -28,7 +29,7 @@ public class CarShowroomRepository implements ICRUDRepository<UUID, CarShowroom>
                 transaction.commit();
             } catch (Exception e) {
                 transaction.rollback();
-                throw e;
+                throw new CustomException(Constant.ERROR_MESSAGE_FAILED_TO_SAVE);
             }
             return showroom;
         }
@@ -43,7 +44,7 @@ public class CarShowroomRepository implements ICRUDRepository<UUID, CarShowroom>
                 transaction.commit();
             } catch (Exception e) {
                 transaction.rollback();
-                throw e;
+                throw new CustomException(Constant.ERROR_MESSAGE_FAILED_TO_SAVE);
             }
             return showroom;
         }
@@ -63,12 +64,12 @@ public class CarShowroomRepository implements ICRUDRepository<UUID, CarShowroom>
 
                 Query<CarShowroom> query = session.createQuery(criteriaQuery);
 
-                query.setMaxResults(1).uniqueResult();
+                query.setMaxResults(Constant.MAX_RESULT_WHEN_FIND_BY_UUID).uniqueResult();
                 transaction.commit();
                 return query.getSingleResult();
             } catch (Exception e) {
                 transaction.rollback();
-                throw e;
+                throw new CustomException(Constant.ERROR_MESSAGE_NOT_FOUND);
             }
         }
     }
@@ -84,7 +85,7 @@ public class CarShowroomRepository implements ICRUDRepository<UUID, CarShowroom>
                 transaction.commit();
             } catch (Exception e) {
                 transaction.rollback();
-                throw e;
+                throw new CustomException(Constant.ERROR_MESSAGE_NOT_FOUND);
             }
         }
     }
@@ -102,7 +103,7 @@ public class CarShowroomRepository implements ICRUDRepository<UUID, CarShowroom>
                 return query.getResultList();
             } catch (Exception e) {
                 transaction.rollback();
-                throw e;
+                throw new CustomException(Constant.ERROR_MESSAGE_NOT_FOUND);
             }
         }
     }
@@ -117,12 +118,12 @@ public class CarShowroomRepository implements ICRUDRepository<UUID, CarShowroom>
                 transaction.commit();
             } catch (Exception e) {
                 transaction.rollback();
-                throw e;
+                throw new CustomException(Constant.ERROR_MESSAGE_FAILED_TO_SAVE);
             }
         }
     }
 
-    public static CarShowroomRepository getInstance() {
-        return CarShowroomRepository.INSTANCE;
+    public static CarShowroomRepositoryImpl getInstance() {
+        return CarShowroomRepositoryImpl.INSTANCE;
     }
 }

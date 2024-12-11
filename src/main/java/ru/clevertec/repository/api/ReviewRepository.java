@@ -1,4 +1,4 @@
-package ru.clevertec.service.api;
+package ru.clevertec.repository.api;
 
 import ru.clevertec.entity.Car;
 import ru.clevertec.entity.Client;
@@ -6,7 +6,7 @@ import ru.clevertec.entity.Review;
 
 import java.util.List;
 
-public interface IReviewService {
+public interface ReviewRepository {
 
     void addReview(Client client, Car car, String text, int rating);
 

@@ -6,7 +6,7 @@ import ru.clevertec.entity.Client;
 import java.util.List;
 import java.util.UUID;
 
-public interface IClientRepository {
+public interface ClientRepository {
 
     void addCarToClient(Client client, Car car);
 

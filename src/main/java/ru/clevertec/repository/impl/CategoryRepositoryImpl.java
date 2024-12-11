@@ -6,15 +6,17 @@ import org.hibernate.query.criteria.HibernateCriteriaBuilder;
 import org.hibernate.query.criteria.JpaCriteriaQuery;
 import org.hibernate.query.criteria.JpaRoot;
 import ru.clevertec.entity.Category;
-import ru.clevertec.repository.api.ICRUDRepository;
+import ru.clevertec.exception.CustomException;
+import ru.clevertec.repository.api.CrudRepository;
+import ru.clevertec.util.Constant;
 import ru.clevertec.util.HibernateUtil;
 
 import java.util.List;
 import java.util.UUID;
 
-public class CategoryRepository implements ICRUDRepository<UUID, Category> {
+public class CategoryRepositoryImpl implements CrudRepository<UUID, Category> {
 
-    private static final CategoryRepository INSTANCE = new CategoryRepository();
+    private static final CategoryRepositoryImpl INSTANCE = new CategoryRepositoryImpl();
 
     @Override
     public Category create(Category category) {
@@ -25,7 +27,7 @@ public class CategoryRepository implements ICRUDRepository<UUID, Category> {
                 transaction.commit();
             } catch (Exception e) {
                 transaction.rollback();
-                throw e;
+                throw new CustomException(Constant.ERROR_MESSAGE_FAILED_TO_SAVE);
             }
             return category;
         }
@@ -40,7 +42,7 @@ public class CategoryRepository implements ICRUDRepository<UUID, Category> {
                 transaction.commit();
             } catch (Exception e) {
                 transaction.rollback();
-                throw e;
+                throw new CustomException(Constant.ERROR_MESSAGE_FAILED_TO_SAVE);
             }
             return category;
         }
@@ -56,16 +58,16 @@ public class CategoryRepository implements ICRUDRepository<UUID, Category> {
 
                 JpaRoot<Category> categoryJpaRoot = criteriaQuery.from(Category.class);
                 criteriaQuery.select(criteriaQuery.from(Category.class))
-                        .where(builder.equal(categoryJpaRoot.get("uuid"), uuid));
+                        .where(builder.equal(categoryJpaRoot.get(Constant.FIELD_UUID), uuid));
 
                 Query<Category> query = session.createQuery(criteriaQuery);
 
-                query.setMaxResults(1).uniqueResult();
+                query.setMaxResults(Constant.MAX_RESULT_WHEN_FIND_BY_UUID).uniqueResult();
                 transaction.commit();
                 return query.getSingleResult();
             } catch (Exception e) {
                 transaction.rollback();
-                throw e;
+                throw new CustomException(Constant.ERROR_MESSAGE_NOT_FOUND);
             }
         }
     }
@@ -81,7 +83,7 @@ public class CategoryRepository implements ICRUDRepository<UUID, Category> {
                 transaction.commit();
             } catch (Exception e) {
                 transaction.rollback();
-                throw e;
+                throw new CustomException(Constant.ERROR_MESSAGE_NOT_FOUND);
             }
         }
     }
@@ -99,12 +101,12 @@ public class CategoryRepository implements ICRUDRepository<UUID, Category> {
                 return query.getResultList();
             } catch (Exception e) {
                 transaction.rollback();
-                throw e;
+                throw new CustomException(Constant.ERROR_MESSAGE_NOT_FOUND);
             }
         }
     }
 
-    public static CategoryRepository getInstance() {
-        return CategoryRepository.INSTANCE;
+    public static CategoryRepositoryImpl getInstance() {
+        return CategoryRepositoryImpl.INSTANCE;
     }
 }

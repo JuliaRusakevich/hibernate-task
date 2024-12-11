@@ -1,24 +1,26 @@
 package ru.clevertec.service.impl;
 
-import ru.clevertec.entity.Car;
+import lombok.extern.slf4j.Slf4j;
 import ru.clevertec.entity.Category;
-import ru.clevertec.repository.impl.CategoryRepository;
-import ru.clevertec.service.api.ICrudService;
+import ru.clevertec.exception.CustomException;
+import ru.clevertec.repository.impl.CategoryRepositoryImpl;
+import ru.clevertec.service.api.BaseService;
 
 import java.util.List;
 import java.util.UUID;
 
-public class CategoryService implements ICrudService<UUID, Category> {
+@Slf4j
+public class CategoryServiceImpl implements BaseService<UUID, Category> {
 
-    private static final CategoryService INSTANCE = new CategoryService();
-    final CategoryRepository repository = CategoryRepository.getInstance();
+    private static final CategoryServiceImpl INSTANCE = new CategoryServiceImpl();
+    final CategoryRepositoryImpl repository = CategoryRepositoryImpl.getInstance();
 
     @Override
     public Category add(Category category) {
         try {
             this.repository.create(category);
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            log.error(e.getMessage());
         }
         return category;
     }
@@ -28,7 +30,7 @@ public class CategoryService implements ICrudService<UUID, Category> {
         try {
             this.repository.update(category);
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            log.error(e.getMessage());
         }
         return category;
     }
@@ -39,15 +41,18 @@ public class CategoryService implements ICrudService<UUID, Category> {
         try {
             category = this.repository.findById(uuid);
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            log.error(e.getMessage());
         }
         return category;
     }
 
     @Override
     public void delete(UUID uuid) {
-        this.repository.delete(uuid);
-
+        try {
+            this.repository.delete(uuid);
+        } catch (CustomException e) {
+            log.error(e.getMessage());
+        }
     }
 
     @Override
@@ -55,7 +60,7 @@ public class CategoryService implements ICrudService<UUID, Category> {
         return null;
     }
 
-    public static CategoryService getInstance() {
-        return CategoryService.INSTANCE;
+    public static CategoryServiceImpl getInstance() {
+        return CategoryServiceImpl.INSTANCE;
     }
 }

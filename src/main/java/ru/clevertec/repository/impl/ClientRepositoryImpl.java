@@ -7,16 +7,18 @@ import org.hibernate.query.criteria.JpaCriteriaQuery;
 import org.hibernate.query.criteria.JpaRoot;
 import ru.clevertec.entity.Car;
 import ru.clevertec.entity.Client;
-import ru.clevertec.repository.api.ICRUDRepository;
-import ru.clevertec.repository.api.IClientRepository;
+import ru.clevertec.exception.CustomException;
+import ru.clevertec.repository.api.CrudRepository;
+import ru.clevertec.util.Constant;
 import ru.clevertec.util.HibernateUtil;
 
 import java.util.List;
 import java.util.UUID;
 
-public class ClientRepository implements ICRUDRepository<UUID, Client>, IClientRepository {
+public class ClientRepositoryImpl implements CrudRepository<UUID, Client>, ru.clevertec.repository.api.ClientRepository {
 
-    private static final ClientRepository INSTANCE = new ClientRepository();
+    private static final ClientRepositoryImpl INSTANCE = new ClientRepositoryImpl();
+
 
     @Override
     public Client create(Client client) {
@@ -27,7 +29,7 @@ public class ClientRepository implements ICRUDRepository<UUID, Client>, IClientR
                 transaction.commit();
             } catch (Exception e) {
                 transaction.rollback();
-                throw e;
+                throw new CustomException(Constant.ERROR_MESSAGE_FAILED_TO_SAVE);
             }
             return client;
         }
@@ -42,7 +44,7 @@ public class ClientRepository implements ICRUDRepository<UUID, Client>, IClientR
                 transaction.commit();
             } catch (Exception e) {
                 transaction.rollback();
-                throw e;
+                throw new CustomException(Constant.ERROR_MESSAGE_FAILED_TO_SAVE);
             }
             return client;
         }
@@ -58,16 +60,16 @@ public class ClientRepository implements ICRUDRepository<UUID, Client>, IClientR
 
                 JpaRoot<Client> clientJpaRoot = criteriaQuery.from(Client.class);
                 criteriaQuery.select(criteriaQuery.from(Client.class))
-                        .where(builder.equal(clientJpaRoot.get("uuid"), uuid));
+                        .where(builder.equal(clientJpaRoot.get(Constant.FIELD_UUID), uuid));
 
                 Query<Client> query = session.createQuery(criteriaQuery);
 
-                query.setMaxResults(1).uniqueResult();
+                query.setMaxResults(Constant.MAX_RESULT_WHEN_FIND_BY_UUID).uniqueResult();
                 transaction.commit();
                 return query.getSingleResult();
             } catch (Exception e) {
                 transaction.rollback();
-                throw e;
+                throw new CustomException(Constant.ERROR_MESSAGE_NOT_FOUND);
             }
         }
     }
@@ -83,7 +85,7 @@ public class ClientRepository implements ICRUDRepository<UUID, Client>, IClientR
                 transaction.commit();
             } catch (Exception e) {
                 transaction.rollback();
-                throw e;
+                throw new CustomException(Constant.ERROR_MESSAGE_NOT_FOUND);
             }
         }
     }
@@ -101,7 +103,7 @@ public class ClientRepository implements ICRUDRepository<UUID, Client>, IClientR
                 return query.getResultList();
             } catch (Exception e) {
                 transaction.rollback();
-                throw e;
+                throw new CustomException(Constant.ERROR_MESSAGE_NOT_FOUND);
             }
         }
     }
@@ -118,7 +120,7 @@ public class ClientRepository implements ICRUDRepository<UUID, Client>, IClientR
                 transaction.commit();
             } catch (Exception e) {
                 transaction.rollback();
-                e.printStackTrace();
+                throw new CustomException(Constant.ERROR_MESSAGE_FAILED_TO_SAVE);
             }
         }
     }
@@ -129,17 +131,17 @@ public class ClientRepository implements ICRUDRepository<UUID, Client>, IClientR
             var transaction = session.beginTransaction();
             try {
                 var query = session.createQuery
-                        ("select c from Car c join c.cars p  where p.id = : client_uuid", Car.class);
-                query.setParameter("client_uuid", clientUUID);
+                        ("select car from Car car join car.clients cc where cc.uuid = :client_uuid", Car.class);
+                query.setParameter(Constant.PARAMETER_CLIENT_UUID, clientUUID);
                 return query.getResultList();
             } catch (Exception e) {
                 transaction.rollback();
-                throw e;
+                throw new CustomException(Constant.ERROR_MESSAGE_NOT_FOUND_CLIENTS_CAR);
             }
         }
     }
 
-    public static ClientRepository getInstance() {
-        return ClientRepository.INSTANCE;
+    public static ClientRepositoryImpl getInstance() {
+        return ClientRepositoryImpl.INSTANCE;
     }
 }

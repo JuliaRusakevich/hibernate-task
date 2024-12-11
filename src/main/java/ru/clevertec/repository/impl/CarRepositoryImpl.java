@@ -10,18 +10,19 @@ import org.hibernate.query.criteria.HibernateCriteriaBuilder;
 import org.hibernate.query.criteria.JpaCriteriaQuery;
 import org.hibernate.query.criteria.JpaRoot;
 import ru.clevertec.entity.Car;
-import ru.clevertec.repository.api.ICRUDRepository;
-import ru.clevertec.repository.api.ICarRepository;
+import ru.clevertec.exception.CustomException;
+import ru.clevertec.repository.api.CrudRepository;
+import ru.clevertec.util.Constant;
 import ru.clevertec.util.HibernateUtil;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class CarRepository implements ICRUDRepository<UUID, Car>, ICarRepository {
+public class CarRepositoryImpl implements CrudRepository<UUID, Car>, ru.clevertec.repository.api.CarRepository {
 
-    private static final CarRepository INSTANCE = new CarRepository();
+    private static final CarRepositoryImpl INSTANCE = new CarRepositoryImpl();
+
 
     @Override
     public Car create(Car car) {
@@ -32,10 +33,10 @@ public class CarRepository implements ICRUDRepository<UUID, Car>, ICarRepository
                 transaction.commit();
             } catch (Exception e) {
                 transaction.rollback();
-                throw e;
+                throw new CustomException(Constant.ERROR_MESSAGE_FAILED_TO_SAVE);
             }
-            return car;
         }
+        return car;
     }
 
     @Override
@@ -47,7 +48,7 @@ public class CarRepository implements ICRUDRepository<UUID, Car>, ICarRepository
                 transaction.commit();
             } catch (Exception e) {
                 transaction.rollback();
-                throw e;
+                throw new CustomException(Constant.ERROR_MESSAGE_FAILED_TO_SAVE);
             }
             return car;
         }
@@ -63,16 +64,16 @@ public class CarRepository implements ICRUDRepository<UUID, Car>, ICarRepository
 
                 JpaRoot<Car> carJpaRoot = criteriaQuery.from(Car.class);
                 criteriaQuery.select(criteriaQuery.from(Car.class))
-                        .where(builder.equal(carJpaRoot.get("uuid"), uuid));
+                        .where(builder.equal(carJpaRoot.get(Constant.FIELD_UUID), uuid));
 
                 Query<Car> query = session.createQuery(criteriaQuery);
 
-                query.setMaxResults(1).uniqueResult();
+                query.setMaxResults(Constant.MAX_RESULT_WHEN_FIND_BY_UUID).uniqueResult();
                 transaction.commit();
                 return query.getSingleResult();
             } catch (Exception e) {
                 transaction.rollback();
-                throw e;
+                throw new CustomException(Constant.ERROR_MESSAGE_NOT_FOUND);
             }
         }
     }
@@ -88,7 +89,7 @@ public class CarRepository implements ICRUDRepository<UUID, Car>, ICarRepository
                 transaction.commit();
             } catch (Exception e) {
                 transaction.rollback();
-                throw e;
+                throw new CustomException(Constant.ERROR_MESSAGE_NOT_FOUND);
             }
         }
     }
@@ -106,7 +107,7 @@ public class CarRepository implements ICRUDRepository<UUID, Car>, ICarRepository
                 return query.getResultList();
             } catch (Exception e) {
                 transaction.rollback();
-                throw e;
+                throw new CustomException(Constant.ERROR_MESSAGE_NOT_FOUND);
             }
         }
     }
@@ -120,11 +121,11 @@ public class CarRepository implements ICRUDRepository<UUID, Car>, ICarRepository
                 JpaCriteriaQuery<Car> criteriaQuery = criteriaBuilder.createQuery(Car.class);
                 JpaRoot<Car> root = criteriaQuery.from(Car.class);
                 if (typeSorting != null) {
-                    if (typeSorting.equalsIgnoreCase("ASC")) {
-                        criteriaQuery.orderBy(criteriaBuilder.asc(root.get("price")));
+                    if (typeSorting.equalsIgnoreCase(Constant.SORT_ASCENDING)) {
+                        criteriaQuery.orderBy(criteriaBuilder.asc(root.get(Constant.FIELD_PRICE)));
                     }
-                    if (typeSorting.equalsIgnoreCase("DESC")) {
-                        criteriaQuery.orderBy(criteriaBuilder.desc(root.get("price")));
+                    if (typeSorting.equalsIgnoreCase(Constant.SORT_DESCENDING)) {
+                        criteriaQuery.orderBy(criteriaBuilder.desc(root.get(Constant.FIELD_PRICE)));
                     }
                 }
                 transaction.commit();
@@ -132,7 +133,7 @@ public class CarRepository implements ICRUDRepository<UUID, Car>, ICarRepository
 
             } catch (Exception e) {
                 transaction.rollback();
-                throw e;
+                throw new CustomException(Constant.ERROR_MESSAGE_NOT_FOUND);
             }
         }
     }
@@ -153,34 +154,32 @@ public class CarRepository implements ICRUDRepository<UUID, Car>, ICarRepository
 
             } catch (Exception e) {
                 transaction.rollback();
-                throw e;
-
+                throw new CustomException(Constant.ERROR_MESSAGE_NOT_FOUND);
             }
         }
     }
 
-
-    public static CarRepository getInstance() {
-        return CarRepository.INSTANCE;
+    public static CarRepositoryImpl getInstance() {
+        return CarRepositoryImpl.INSTANCE;
     }
 
     private Predicate getPredicate(String make, String category, Integer year, BigDecimal minPrice, BigDecimal maxPrice, CriteriaBuilder criteriaBuilder, Root<Car> root) {
         Predicate predicate = criteriaBuilder.conjunction();
 
         if (make != null) {
-            predicate = criteriaBuilder.and(predicate, criteriaBuilder.equal(root.get("make"), make));
+            predicate = criteriaBuilder.and(predicate, criteriaBuilder.equal(root.get(Constant.FIELD_MAKE), make));
         }
         if (year != null) {
-            predicate = criteriaBuilder.and(predicate, criteriaBuilder.equal(root.get("year"), year));
+            predicate = criteriaBuilder.and(predicate, criteriaBuilder.equal(root.get(Constant.FIELD_YEAR), year));
         }
         if (category != null) {
-            predicate = criteriaBuilder.and(predicate, criteriaBuilder.equal(root.get("category").get("name"), category));
+            predicate = criteriaBuilder.and(predicate, criteriaBuilder.equal(root.get(Constant.FIELD_CATEGORY).get(Constant.FIELD_CATEGORY_NAME), category));
         }
         if (minPrice != null) {
-            predicate = criteriaBuilder.and(predicate, criteriaBuilder.ge(root.get("price"), minPrice));
+            predicate = criteriaBuilder.and(predicate, criteriaBuilder.ge(root.get(Constant.FIELD_PRICE), minPrice));
         }
         if (maxPrice != null) {
-            predicate = criteriaBuilder.and(predicate, criteriaBuilder.le(root.get("price"), maxPrice));
+            predicate = criteriaBuilder.and(predicate, criteriaBuilder.le(root.get(Constant.FIELD_PRICE), maxPrice));
         }
         return predicate;
     }

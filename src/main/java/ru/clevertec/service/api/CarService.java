@@ -1,11 +1,12 @@
-package ru.clevertec.repository.api;
+package ru.clevertec.service.api;
 
 import ru.clevertec.entity.Car;
 
 import java.math.BigDecimal;
 import java.util.List;
 
-public interface ICarRepository {
+
+public interface CarService {
 
     List<Car> findCarsSortedByPrice(String typeSorting);
 

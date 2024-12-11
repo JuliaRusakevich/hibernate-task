@@ -11,17 +11,18 @@ import org.hibernate.query.criteria.JpaRoot;
 import ru.clevertec.entity.Car;
 import ru.clevertec.entity.Client;
 import ru.clevertec.entity.Review;
-import ru.clevertec.repository.api.ICRUDRepository;
-import ru.clevertec.repository.api.IReviewRepository;
+import ru.clevertec.exception.CustomException;
+import ru.clevertec.repository.api.CrudRepository;
+import ru.clevertec.util.Constant;
 import ru.clevertec.util.HibernateUtil;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.regex.Pattern;
 
-public class ReviewRepository implements ICRUDRepository<UUID, Review>, IReviewRepository {
+public class ReviewRepositoryImpl implements CrudRepository<UUID, Review>, ru.clevertec.repository.api.ReviewRepository {
 
-    private static final ReviewRepository INSTANCE = new ReviewRepository();
+    private static final ReviewRepositoryImpl INSTANCE = new ReviewRepositoryImpl();
+
 
     @Override
     public Review create(Review review) {
@@ -32,7 +33,7 @@ public class ReviewRepository implements ICRUDRepository<UUID, Review>, IReviewR
                 transaction.commit();
             } catch (Exception e) {
                 transaction.rollback();
-                throw e;
+                throw new CustomException(Constant.ERROR_MESSAGE_FAILED_TO_SAVE);
             }
             return review;
         }
@@ -47,7 +48,7 @@ public class ReviewRepository implements ICRUDRepository<UUID, Review>, IReviewR
                 transaction.commit();
             } catch (Exception e) {
                 transaction.rollback();
-                throw e;
+                throw new CustomException(Constant.ERROR_MESSAGE_FAILED_TO_SAVE);
             }
             return review;
         }
@@ -63,7 +64,7 @@ public class ReviewRepository implements ICRUDRepository<UUID, Review>, IReviewR
 
                 JpaRoot<Review> reviewJpaRoot = criteriaQuery.from(Review.class);
                 criteriaQuery.select(criteriaQuery.from(Review.class))
-                        .where(builder.equal(reviewJpaRoot.get("uuid"), uuid));
+                        .where(builder.equal(reviewJpaRoot.get(Constant.FIELD_UUID), uuid));
 
                 Query<Review> query = session.createQuery(criteriaQuery);
 
@@ -72,10 +73,8 @@ public class ReviewRepository implements ICRUDRepository<UUID, Review>, IReviewR
                 return query.getSingleResult();
             } catch (Exception e) {
                 transaction.rollback();
-                System.out.println(e.getMessage());
-                //throw e;
+                throw new CustomException(Constant.ERROR_MESSAGE_NOT_FOUND);
             }
-            return null;
         }
     }
 
@@ -90,7 +89,7 @@ public class ReviewRepository implements ICRUDRepository<UUID, Review>, IReviewR
                 transaction.commit();
             } catch (Exception e) {
                 transaction.rollback();
-                throw e;
+                throw new CustomException(Constant.ERROR_MESSAGE_NOT_FOUND);
             }
 
         }
@@ -109,7 +108,7 @@ public class ReviewRepository implements ICRUDRepository<UUID, Review>, IReviewR
                 return query.getResultList();
             } catch (Exception e) {
                 transaction.rollback();
-                throw e;
+                throw new CustomException(Constant.ERROR_MESSAGE_NOT_FOUND);
             }
         }
     }
@@ -119,6 +118,11 @@ public class ReviewRepository implements ICRUDRepository<UUID, Review>, IReviewR
 
         try (var session = HibernateUtil.getSession()) {
             var transaction = session.beginTransaction();
+
+          //  if (!client.getCars().contains(car)) {
+          //      throw new CustomException(Constant.ERROR_MESSAGE_NOT_FOUND_CLIENTS_CAR);
+         //   }
+
             try {
                 var review = Review.builder()
                         .uuid(UUID.randomUUID())
@@ -133,7 +137,7 @@ public class ReviewRepository implements ICRUDRepository<UUID, Review>, IReviewR
 
             } catch (Exception e) {
                 transaction.rollback();
-                e.printStackTrace();
+                throw new CustomException(Constant.ERROR_MESSAGE_FAILED_TO_SAVE);
             }
         }
     }
@@ -148,7 +152,7 @@ public class ReviewRepository implements ICRUDRepository<UUID, Review>, IReviewR
                 CriteriaQuery<Review> criteriaQuery = criteriaBuilder.createQuery(Review.class);
                 Root<Review> root = criteriaQuery.from(Review.class);
 
-                String pattern = "%" + keyword + "%";
+                String pattern = Constant.SYMBOL_PERCENT + keyword + Constant.SYMBOL_PERCENT;
 
                 criteriaQuery.select(criteriaQuery.from(Review.class)).where(criteriaBuilder.like(root.get("review"), pattern));
 
@@ -158,14 +162,14 @@ public class ReviewRepository implements ICRUDRepository<UUID, Review>, IReviewR
 
             } catch (Exception e) {
                 transaction.rollback();
-                throw e;
+                throw new CustomException(Constant.ERROR_MESSAGE_NOT_FOUND);
             }
         }
     }
 
 
-    public static ReviewRepository getInstance() {
-        return ReviewRepository.INSTANCE;
+    public static ReviewRepositoryImpl getInstance() {
+        return ReviewRepositoryImpl.INSTANCE;
     }
 
 

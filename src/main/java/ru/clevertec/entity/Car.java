@@ -32,7 +32,7 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(callSuper = true)
+@ToString
 @Builder
 @Entity
 @Table(schema = "car_showroom", name = "cars")
@@ -61,15 +61,15 @@ public class Car {
     @JoinColumn(name = "car_showroom_uuid")
     private CarShowroom carShowroom;
 
-    @OneToMany(mappedBy = "car", cascade = CascadeType.ALL, orphanRemoval = true)
+    //убрала CascadeType.PERSIST
+    @OneToMany(mappedBy = "car")
     @Builder.Default
     private List<Review> reviews = new ArrayList<>();
 
-    @ManyToMany(cascade = CascadeType.ALL)
-    @JoinTable(name = "client_cars",
-            joinColumns = @JoinColumn(name = "car_uuid"),
-            inverseJoinColumns = @JoinColumn(name = "client_uuid"))
+
+    @ManyToMany(mappedBy = "cars")
     @Builder.Default
-    private List<Car> cars = new ArrayList<>();
+    private List<Client> clients = new ArrayList<>();
+
 
 }
