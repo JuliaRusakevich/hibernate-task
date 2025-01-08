@@ -12,14 +12,16 @@ repositories {
 
 ext {
     junitVersion = '5.8.2'
-    lombokVersion = '1.18.26'
+    lombokVersion = '1.18.30'
     postgresqlVersion = '42.7.2'
     slf4jVersion = '2.0.9'
     hibernateVersion = '6.2.6.Final'
 }
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
 
-sourceCompatibility = JavaVersion.VERSION_17
-targetCompatibility = JavaVersion.VERSION_17
 
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
@@ -43,6 +45,9 @@ dependencies {
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
+
+// https://mvnrepository.com/artifact/org.slf4j/slf4j-nop
+    implementation group: 'org.slf4j', name: 'slf4j-nop', version: '2.0.16'
 }
 
 test {
